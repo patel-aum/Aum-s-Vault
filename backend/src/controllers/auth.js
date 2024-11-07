@@ -50,6 +50,19 @@ export const register = async (req, res) => {
         [user.id, savingsAccountNumber, 'savings', 0]
       );
 
+      // Create a card for the user
+      const cardNumber = '4532 **** **** ' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      const cardType = 'credit';  // You can customize or change the card type logic
+      const expiryDate = '12/25'; // Replace with a real expiry date if necessary
+      const cvv = Math.floor(100 + Math.random() * 900);  // Random CVV for demonstration
+
+      // Insert card information into the cards table
+      await query(
+        'INSERT INTO cards (user_id, card_number, card_type, expiry_date, cvv) VALUES ($1, $2, $3, $4, $5)',
+        [user.id, cardNumber, cardType, expiryDate, cvv]
+      );
+
+      // Commit transaction
       await query('COMMIT');
 
       // Create token
@@ -97,9 +110,19 @@ export const login = async (req, res) => {
             'type', a.type,
             'balance', a.balance
           )
-        ) as accounts 
+        ) as accounts,
+        json_agg(
+          json_build_object(
+            'id', c.id,
+            'card_number', c.card_number,
+            'card_type', c.card_type,
+            'expiry_date', c.expiry_date,
+            'cvv', c.cvv
+          )
+        ) as cards
        FROM users u 
-       LEFT JOIN accounts a ON u.id = a.user_id 
+       LEFT JOIN accounts a ON u.id = a.user_id
+       LEFT JOIN cards c ON u.id = c.user_id
        WHERE u.email = $1 
        GROUP BY u.id`,
       [email]
@@ -134,7 +157,8 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        accounts: user.accounts
+        accounts: user.accounts,
+        cards: user.cards  // Returning the associated cards as well
       }
     });
   } catch (error) {

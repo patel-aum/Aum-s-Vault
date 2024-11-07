@@ -26,27 +26,36 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             {isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className="hover:text-indigo-200">Dashboard</Link>
-                <Link to="/services" className="hover:text-indigo-200">Services</Link>
-                <Link to="/cards" className="flex items-center space-x-1 hover:text-indigo-200">
-                  <CreditCard className="h-4 w-4" />
-                  <span>Cards</span>
-                </Link>
-                <Link to="/transfer" className="flex items-center space-x-1 hover:text-indigo-200">
-                  <Send className="h-4 w-4" />
-                  <span>Transfer</span>
-                </Link>
-                {user?.role === 'admin' && (
+              user?.role === 'admin' ? (
+                <>
                   <Link to="/admin" className="hover:text-indigo-200">Admin</Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="bg-white text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-100"
-                >
-                  Logout
-                </button>
-              </>
+                  <button
+                    onClick={handleLogout}
+                    className="bg-white text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-100"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/dashboard" className="hover:text-indigo-200">Dashboard</Link>
+                  <Link to="/services" className="hover:text-indigo-200">Services</Link>
+                  <Link to="/cards" className="flex items-center space-x-1 hover:text-indigo-200">
+                    <CreditCard className="h-4 w-4" />
+                    <span>Cards</span>
+                  </Link>
+                  <Link to="/transfer" className="flex items-center space-x-1 hover:text-indigo-200">
+                    <Send className="h-4 w-4" />
+                    <span>Transfer</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="bg-white text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-100"
+                  >
+                    Logout
+                  </button>
+                </>
+              )
             ) : (
               <>
                 <Link to="/login" className="hover:text-indigo-200">Login</Link>
@@ -78,46 +87,55 @@ export default function Navbar() {
         >
           <div className="px-2 pt-2 pb-3 space-y-1">
             {isAuthenticated ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="block px-3 py-2 rounded-md hover:bg-indigo-500"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/services"
-                  className="block px-3 py-2 rounded-md hover:bg-indigo-500"
-                >
-                  Services
-                </Link>
-                <Link
-                  to="/cards"
-                  className="block px-3 py-2 rounded-md hover:bg-indigo-500"
-                >
-                  Cards
-                </Link>
-                <Link
-                  to="/transfer"
-                  className="block px-3 py-2 rounded-md hover:bg-indigo-500"
-                >
-                  Transfer
-                </Link>
-                {user?.role === 'admin' && (
+              user?.role === 'admin' ? (
+                <>
                   <Link
                     to="/admin"
                     className="block px-3 py-2 rounded-md hover:bg-indigo-500"
                   >
                     Admin
                   </Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 rounded-md bg-white text-indigo-600 hover:bg-indigo-100"
-                >
-                  Logout
-                </button>
-              </>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 rounded-md bg-white text-indigo-600 hover:bg-indigo-100"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="block px-3 py-2 rounded-md hover:bg-indigo-500"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/services"
+                    className="block px-3 py-2 rounded-md hover:bg-indigo-500"
+                  >
+                    Services
+                  </Link>
+                  <Link
+                    to="/cards"
+                    className="block px-3 py-2 rounded-md hover:bg-indigo-500"
+                  >
+                    Cards
+                  </Link>
+                  <Link
+                    to="/transfer"
+                    className="block px-3 py-2 rounded-md hover:bg-indigo-500"
+                  >
+                    Transfer
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 rounded-md bg-white text-indigo-600 hover:bg-indigo-100"
+                  >
+                    Logout
+                  </button>
+                </>
+              )
             ) : (
               <>
                 <Link

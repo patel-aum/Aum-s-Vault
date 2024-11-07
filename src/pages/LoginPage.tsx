@@ -21,12 +21,19 @@ export default function LoginPage() {
       const response = await auth.login(email, password);
       localStorage.setItem('token', response.token);
       login(response.user);
-      navigate('/dashboard');
+    
+      // Redirect based on role
+      if (response.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred during login');
     } finally {
       setIsLoading(false);
     }
+
   };
 
   return (

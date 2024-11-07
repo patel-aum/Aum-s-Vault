@@ -34,6 +34,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchTransactions();
+    const handleFocus = () => {
+      setIsLoading(true);
+      fetchTransactions();
+    };
+
+    // Add event listener for page focus
+    window.addEventListener('focus', handleFocus);
+    
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const totalBalance = user?.accounts?.reduce((sum, account) => sum + account.balance, 0) || 0;
