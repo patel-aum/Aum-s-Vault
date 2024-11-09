@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transactions-service
+  namespace: production
+  labels:
+    app: transactions-service
+spec:
+  replicas: 2  
+  selector:
+    matchLabels:
+      app: transactions-service
+  template:
+    metadata:
+      labels:
+        app: transactions-service
+    spec:
+      containers:
+        - name: transactions-service
+          image: transactions-service:latest  
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - configMapRef:
+                name: transactions-service-config
+          readinessProbe:
+            httpGet:
+              path: /health  
+              port: 5002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 15
+            periodSeconds: 20
+

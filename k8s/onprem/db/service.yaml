@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: on-prem-db
+  namespace: database
+  labels:
+    app: on-prem-db
+spec:
+  type: ClusterIP  # Internal-only; use LoadBalancer if external access is needed
+  selector:
+    app: on-prem-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: transactions-service-config
+  namespace: production
+data:
+  DATABASE_URL: "postgresql://postgres:postgres@db:5432/aumsvault"
+  AUTH_SERVICE_URL: "http://auth-service.production.svc.cluster.local:5000"  
+

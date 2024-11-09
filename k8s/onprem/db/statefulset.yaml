@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: on-prem-db
+  namespace: database
+  labels:
+    app: on-prem-db
+spec:
+  serviceName: on-prem-db  # Matches the Service name
+  replicas: 1
+  selector:
+    matchLabels:
+      app: on-prem-db
+  template:
+    metadata:
+      labels:
+        app: on-prem-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine  # Use your desired PostgreSQL version
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: on-prem-db-config
+            - secretRef:
+                name: on-prem-db-secret
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: <your-storage-class>  # Use appropriate storage class
+        resources:
+          requests:
+            storage: 10Gi
+

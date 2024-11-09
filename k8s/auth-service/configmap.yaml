@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: production
+data:
+  DATABASE_URL: "postgresql://postgres:postgres@db:5432/aumsvault"
+  NODE_ENV: "production"
+  PORT: "5000"
+
