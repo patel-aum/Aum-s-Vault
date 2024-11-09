@@ -37,8 +37,7 @@ export default function TransferPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-
-  const savingsAccount = user?.accounts?.find(acc => acc.type === 'savings');
+  const [savingsAccount, setSavingsAccount] = useState(user?.accounts?.find(acc => acc.type === 'savings'));
 
   useEffect(() => {
     fetchBeneficiaries();
@@ -66,9 +65,19 @@ export default function TransferPage() {
   const fetchRecentTransactions = async () => {
     try {
       const data = await transactions.getAll();
-      setRecentTransactions(data);
+      const last6Transactions = data.slice(0, 6); // Get only the last 6 transactions
+      setRecentTransactions(last6Transactions); // Update state with the last 6 transactions
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
+    }
+  };
+
+  const fetchUserAccount = async () => {
+    try {
+      const data = await users.getAccountById(savingsAccount?.id);
+      setSavingsAccount(data); // Update the savings account after the transfer
+    } catch (error) {
+      console.error('Failed to fetch user account:', error);
     }
   };
 
@@ -94,7 +103,9 @@ export default function TransferPage() {
       setSelectedBeneficiary(null);
       setSelectedAccount('');
 
-      fetchRecentTransactions();
+      // Refetch the user’s account to update the balance
+      fetchUserAccount();
+      fetchRecentTransactions(); // To update the transaction history as well
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Transfer failed');
     } finally {
@@ -266,3 +277,4 @@ export default function TransferPage() {
     </div>
   );
 }
+ 

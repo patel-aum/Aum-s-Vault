@@ -6,6 +6,7 @@ import AddMoneyModal from '../components/AddMoneyModal';
 import { formatCurrency } from '../lib/utils';
 import { useAuthStore } from '../store/authStore';
 import { transactions as transactionApi } from '../lib/api';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface Transaction {
   id: string;
@@ -24,32 +25,45 @@ export default function DashboardPage() {
   const fetchTransactions = async () => {
     try {
       const data = await transactionApi.getAll();
-      setTransactions(data);
+      const recentTransactions = data.slice(0, 6); 
+      setTransactions(recentTransactions); 
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); 
     }
   };
 
   useEffect(() => {
-    fetchTransactions();
-    const handleFocus = () => {
-      setIsLoading(true);
-      fetchTransactions();
-    };
+    fetchTransactions(); 
+    const handleFocus = () => {};
+      setIsLoading(true); 
+      fetchTransactions(); 
 
-    // Add event listener for page focus
     window.addEventListener('focus', handleFocus);
-    
-    // Clean up the event listener
+
     return () => {
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('focus', handleFocus); //
     };
   }, []);
 
   const totalBalance = user?.accounts?.reduce((sum, account) => sum + account.balance, 0) || 0;
-  const savingsAccount = user?.accounts?.find(acc => acc.type === 'savings');
+  const savingsAccount = user?.accounts?.find(acc => acc.type === 'savings'); 
+
+  const last6credit = transactions
+    .filter(txn => txn.type === 'credit') 
+    .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
+
+  const last6debit = transactions
+    .filter(txn => txn.type === 'debit') 
+    .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
+
+  const pieChartData = [
+    { name: 'Credit', value: last6credit },
+    { name: 'Debit', value: last6debit },
+  ];
+
+  const COLORS = ['#82ca9d', '#ff7f50']; 
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -90,13 +104,31 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Account Activity</h3>
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            Chart will be implemented with Recharts
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieChartData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label
+                >
+                  {pieChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
         <div className="lg:col-span-1">
-          <TransactionList transactions={transactions} />
+          <TransactionList transactions={transactions} /> {/* Display only the last 6 transactions */}
         </div>
       </div>
 

@@ -1,39 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Eye, EyeOff } from 'lucide-react';
 import { formatAccountNumber } from '../lib/utils';
+import { cards, users } from '../lib/api'; 
 
 interface Card {
   id: string;
   type: 'credit' | 'debit';
   number: string;
   expiryDate: string;
-  name: string;
+  name: string; 
   balance?: number;
   limit?: number;
-}
-
-const mockCards: Card[] = [
-  {
-    id: '1',
-    type: 'credit',
-    number: '4532 **** **** 7895',
-    expiryDate: '12/25',
-    name: 'John Doe',
-    balance: 2500,
-    limit: 10000,
-  },
-  {
-    id: '2',
-    type: 'debit',
-    number: '5248 **** **** 1234',
-    expiryDate: '09/26',
-    name: 'John Doe',
-    balance: 5400,
-  },
-];
+} 
 
 export default function CardsPage() {
+  const [cardsList, setCardsList] = useState<Card[]>([]);
   const [showCardDetails, setShowCardDetails] = useState<Record<string, boolean>>({});
+
+  // Fetching cards from card service
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const fetchedCards = await cards.getAll(); // Fetch cards from the API
+        const mappedCards = await Promise.all(fetchedCards.map(async (card: any) => {
+          const userDetails = await users.getProfile(card.user_id); // Fetch user details for each card
+
+          return {
+            id: card.id.toString(), 
+            type: card.card_type === 'credit' ? 'credit' : 'debit', 
+            number: card.card_number,
+            expiryDate: new Date(card.expiry_date).toLocaleDateString(), // Format expiry date
+            name: userDetails.name,  // Get name from user details
+            balance: 0, // Placeholder balance, adjust as needed
+            limit: card.card_type === 'credit' ? 10000 : undefined, // Placeholder limit for credit cards
+          };
+        }));
+        
+        setCardsList(mappedCards); // Set the mapped cards with user info
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+      }
+    };
+
+    fetchCards();
+  }, []);
 
   const toggleCardDetails = (cardId: string) => {
     setShowCardDetails(prev => ({
@@ -53,7 +63,7 @@ export default function CardsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {mockCards.map((card) => (
+        {cardsList.map((card) => (
           <div key={card.id} className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-xl text-white">
             <div className="flex justify-between items-start mb-8">
               <CreditCard className="h-10 w-10" />

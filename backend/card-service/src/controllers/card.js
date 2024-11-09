@@ -17,8 +17,6 @@ export const getCards = async (req, res) => {
 export const createCard = async (req, res) => {
   try {
     const { cardType } = req.body;
-
-    // Generate card details (in production, this would be handled by a payment processor)
     const cardNumber = Math.random().toString().slice(2, 18);
     const cvv = Math.random().toString().slice(2, 5);
     const expiryDate = new Date();

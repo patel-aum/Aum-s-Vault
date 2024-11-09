@@ -15,7 +15,7 @@ const cardServiceURL = `http://${cardServiceHost}:${cardServicePort}/api`;
 const transactionsServiceURL = `http://${transactionsServiceHost}:${transactionsServicePort}/api`;
 
 const api = axios.create({
-  baseURL: authServiceURL, // Default to auth service URL for the base
+  baseURL: authServiceURL, 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -92,13 +92,14 @@ export const users = {
 
 export const cards = {
   getAll: async () => {
-    const response = await axios.get(`${cardServiceURL}/cards`);
+    const response = await api.get(`${cardServiceURL}/cards`); 
     return response.data;
   },
   create: async (data: any) => {
-    const response = await axios.post(`${cardServiceURL}/cards`, data);
+    const response = await api.post(`${cardServiceURL}/cards`, data); 
     return response.data;
   },
 };
+
 
 export default api;

@@ -1,28 +1,39 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5000';
 
 export const auth = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied, no token provided' });
-  }
-
   try {
-    const response = await axios.post(`${AUTH_SERVICE_URL}/auth/validate-token`, { token });
-    if (response.data.valid) {
+    console.log("Request headers:", req.headers);
+
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authorization header is missing', error: 'Authorization header is required for card service' });
+    }
+
+    try {
+      const response = await axios.get(`${process.env.AUTH_SERVICE_URL}/api/auth/validate-token`, {
+        headers: {
+          'Authorization': authHeader 
+        }  
+      });
+
+      if (!response.data.isValid) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+
       req.user = response.data.user;
       next();
-    } else {
-      res.status(401).json({ message: 'Invalid token' });
+    } catch (error) {
+      if (error.response) {
+        console.error("Error from auth service:", error.response.data);
+        return res.status(error.response.status).json({
+          message: error.response.data.message || 'Authentication failed',
+          error: error.response.data
+        });
+      }
+      throw error;
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Auth service error' });
+    console.error("Authentication error:", error);
+    res.status(500).json({ message: 'Internal server error during authentication', error: error.message });
   }
 };
-
