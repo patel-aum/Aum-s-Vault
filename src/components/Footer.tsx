@@ -1,4 +1,4 @@
-import { Wallet } from 'lucide-react';
+import { Vault } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2">
-              <Wallet className="h-6 w-6" />
+              <Vault className="h-6 w-6" />
               <span className="text-lg font-bold">Aum's Vault</span>
             </div>
             <p className="mt-2 text-gray-400">

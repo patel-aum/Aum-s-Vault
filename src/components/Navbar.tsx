@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Wallet, CreditCard, Send, Menu, X } from 'lucide-react';
+import { Vault, CreditCard, Send, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { cn } from '../lib/utils';
@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <Wallet className="h-8 w-8" />
+            <Vault className="h-8 w-8" />
             <span className="text-xl font-bold">Aum's Vault</span>
           </Link>
 

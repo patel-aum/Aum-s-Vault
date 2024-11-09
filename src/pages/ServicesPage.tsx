@@ -1,4 +1,4 @@
-import { CreditCard, Send, Wallet, PiggyBank, Briefcase, Shield } from 'lucide-react';
+import { CreditCard, Send, PiggyBank, Briefcase, Shield, Vault } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const services = [
@@ -38,7 +38,7 @@ const services = [
     color: 'bg-red-500',
   },
   {
-    icon: <Wallet className="h-8 w-8" />,
+    icon: <Vault className="h-8 w-8" />,
     title: 'Loans',
     description: 'Get quick access to funds',
     link: '/loans',

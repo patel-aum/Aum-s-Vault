@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Wallet, CreditCard, TrendingUp } from 'lucide-react';
+import { Vault, CreditCard, TrendingUp } from 'lucide-react';
 import DashboardCard from '../components/DashboardCard';
 import TransactionList from '../components/TransactionList';
 import AddMoneyModal from '../components/AddMoneyModal';
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         <DashboardCard
           title="Total Balance"
           value={formatCurrency(totalBalance)}
-          icon={<Wallet className="h-6 w-6 text-indigo-600" />}
+          icon={<Vault className="h-6 w-6 text-indigo-600" />}
         />
         <DashboardCard
           title="Savings Account"
