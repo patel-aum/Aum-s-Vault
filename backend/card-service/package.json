@@ -1,0 +1,18 @@
+{
+  "name": "card-service",
+  "version": "1.0.0",
+  "description": "Card microservice",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "axios": "^1.3.0"
+  }
+}
+

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transactions-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transactions-service
+  template:
+    metadata:
+      labels:
+        app: transactions-service
+    spec:
+      containers:
+        - name: transactions-service
+          image: your-transactions-service-image
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - configMapRef:
+                name: app-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transactions-service
+spec:
+  selector:
+    app: transactions-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
