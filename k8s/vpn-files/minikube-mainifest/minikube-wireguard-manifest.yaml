@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wireguard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wireguard-config
+  namespace: wireguard
+data:
+  wg0.conf: |
+    [Interface]
+    PrivateKey = <add here>  # Add youre on-prem minikube private key
+    Address = 10.0.0.2/24
+    DNS = 8.8.8.8, 8.8.4.4
+
+    [Peer]
+    PublicKey = <add here>  # Add your EKS or cloud public key
+    Endpoint = <add here> #<ip:51820>  # Add your EKS node IP here
+    AllowedIPs = 10.0.0.0/24
+    PersistentKeepalive = 25
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: wireguard
+spec:
+  selector:
+    matchLabels:
+      app: wireguard
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: wireguard
+    spec:
+      hostNetwork: true  # Important for cross-cluster networking
+      containers:
+        - name: wireguard
+          image: linuxserver/wireguard:latest
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+          ports:
+            - containerPort: 51820
+              protocol: UDP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/wireguard
+            - name: modules
+              mountPath: /lib/modules
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "UTC"
+      volumes:
+        - name: config
+          configMap:
+            name: wireguard-config
+        - name: modules
+          hostPath:
+            path: /lib/modules
+

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: transactions-service
 spec:
-  replicas: 2  
+  replicas: 1  
   selector:
     matchLabels:
       app: transactions-service
@@ -17,22 +17,9 @@ spec:
     spec:
       containers:
         - name: transactions-service
-          image: transactions-service:latest  
+          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/transactions-service:v1 
           ports:
             - containerPort: 5002
           envFrom:
             - configMapRef:
                 name: transactions-service-config
-          readinessProbe:
-            httpGet:
-              path: /health  
-              port: 5002
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5002
-            initialDelaySeconds: 15
-            periodSeconds: 20
-

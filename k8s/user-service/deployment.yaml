@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: user-service:latest  
+          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/user-service:v1 
           ports:
             - containerPort: 5003
           envFrom:
@@ -25,15 +25,3 @@ spec:
                 name: user-service-config
             - secretRef:
                 name: user-service-secrets
-          readinessProbe:
-            httpGet:
-              path: /health  
-              port: 5003
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5003
-            initialDelaySeconds: 15
-            periodSeconds: 20

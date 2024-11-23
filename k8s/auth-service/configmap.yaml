@@ -4,7 +4,8 @@ metadata:
   name: auth-service-config
   namespace: production
 data:
-  DATABASE_URL: "postgresql://postgres:postgres@db:5432/aumsvault"
+  DATABASE_URL: "postgresql://postgres:Aum$Pass@db.production.svc.cluster.local:31657/aumsvault"
+    #DATABASE_URL: "postgresql://postgres:postgres@db.production.svc.cluster.local:5432/aumsvault"
   NODE_ENV: "production"
   PORT: "5000"
 

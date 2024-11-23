@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  type: ClusterIP  # Or LoadBalancer if direct external access is needed
+  type: NodePort
   selector:
     app: frontend
   ports:

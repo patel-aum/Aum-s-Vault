@@ -17,22 +17,9 @@ spec:
     spec:
       containers:
         - name: card-service
-          image: card-service:latest  
+          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/card-service:v1 
           ports:
             - containerPort: 5001
           envFrom:
             - configMapRef:
                 name: card-service-config
-          readinessProbe:
-            httpGet:
-              path: /health  
-              port: 5001
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5001
-            initialDelaySeconds: 15
-            periodSeconds: 20
-

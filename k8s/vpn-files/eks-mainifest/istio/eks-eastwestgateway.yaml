@@ -1,0 +1,24 @@
+# eks-demo-config.yaml (apply on eks-demo cluster)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio
+  namespace: istio-system
+data:
+  mesh: |-
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+    networkName: network1
+    meshNetworks:
+      network1:
+        endpoints:
+        - fromRegistry: cluster1
+        gateways:
+        - address: 10.0.0.1
+          port: 15443
+      network2:
+        endpoints:
+        - fromRegistry: cluster2
+        gateways:
+        - address: 10.0.0.2
+          port: 15443

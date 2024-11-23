@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -9,6 +9,9 @@ COPY . .
 RUN npm run build
 
 FROM nginx:alpine
+#FROM openresty/openresty:alpine
+#COPY --from=builder /app/dist /usr/share/openresty/html
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY default.conf.template /etc/nginx/conf.d/default.conf.template
 

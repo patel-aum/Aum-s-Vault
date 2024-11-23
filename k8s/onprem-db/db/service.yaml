@@ -5,12 +5,15 @@ metadata:
   namespace: database
   labels:
     app: on-prem-db
+  annotations:
+    metallb.universe.tf/address-pool: default
 spec:
-  type: ClusterIP  # Internal-only; use LoadBalancer if external access is needed
+  type: NodePort
   selector:
     app: on-prem-db
   ports:
-    - protocol: TCP
+    - nodePort: 31657
+      protocol: TCP
       port: 5432
       targetPort: 5432
 

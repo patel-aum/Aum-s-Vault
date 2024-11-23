@@ -1,5 +1,5 @@
 services:
-  # frontend:
+  # monolith-frontend:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
   frontend:
     image: frontend-app
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "80:80"
@@ -87,7 +87,7 @@ services:
     depends_on:
       - db
 
-  # backend:
+  # monolith-backend:
   #   build:
   #     context: ./backend
   #     dockerfile: Dockerfile
@@ -124,4 +124,3 @@ services:
 
 volumes:
   postgres_data:
-

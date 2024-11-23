@@ -6,7 +6,7 @@ metadata:
   labels:
     app: auth-service
 spec:
-  replicas: 2  
+  replicas: 1 
   selector:
     matchLabels:
       app: auth-service
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: auth-service:latest  
+          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/auth-service:v1 
           ports:
             - containerPort: 5000
           envFrom:
@@ -25,16 +25,3 @@ spec:
                 name: auth-service-config
             - secretRef:
                 name: auth-service-secrets
-          readinessProbe:
-            httpGet:
-              path: /health  
-              port: 5000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5000
-            initialDelaySeconds: 15
-            periodSeconds: 20
-

@@ -1,4 +1,6 @@
-# Logs
+*.key
+*/istio/*
+
 logs
 *.log
 npm-debug.log*

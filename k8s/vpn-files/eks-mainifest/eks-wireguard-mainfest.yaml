@@ -1,0 +1,84 @@
+# eks-manifest.yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wireguard-config
+  namespace: wireguard
+data:
+  wg0.conf: |
+    [Interface]
+    PrivateKey = <add here> #Add your eks privatekey
+    Address = 10.0.0.1/24
+    ListenPort = 51820
+    
+    #    PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    #    PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+    [Peer]
+    PublicKey = <add here> #Add your on-prem or minikube publickey
+    AllowedIPs =  10.0.0.0/24
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: wireguard
+spec:
+  selector:
+    matchLabels:
+      app: wireguard
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: wireguard
+    spec:
+      hostNetwork: true
+      containers:
+      - name: wireguard
+        image: linuxserver/wireguard:latest
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+              - SYS_MODULE
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/wireguard
+        - name: modules
+          mountPath: /lib/modules
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "UTC"
+      volumes:
+      - name: config
+        configMap:
+          name: wireguard-config
+      - name: modules
+        hostPath:
+          path: /lib/modules
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wireguard
+  namespace: wireguard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 51820
+    targetPort: 51820
+    protocol: UDP
+  selector:
+    app: wireguard

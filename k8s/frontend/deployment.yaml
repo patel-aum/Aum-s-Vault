@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2  
+  replicas: 1 
   selector:
     matchLabels:
       app: frontend
@@ -17,22 +17,9 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: patel-aum/frontend-app:latest 
+          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/frontend:v1 
           ports:
             - containerPort: 80
           envFrom:
             - configMapRef:
                 name: frontend-config
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 15
-            periodSeconds: 20
-

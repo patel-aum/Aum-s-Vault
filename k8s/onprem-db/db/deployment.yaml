@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: on-prem-db
+  namespace: database
+  labels:
+    app: on-prem-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: on-prem-db
+  template:
+    metadata:
+      labels:
+        app: on-prem-db
+    spec:
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsGroup: 999
+      initContainers:
+        - name: init-chmod-data
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              chown -R 999:999 /var/lib/postgresql/data
+              chmod 700 /var/lib/postgresql/data
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: on-prem-db-config
+            - secretRef:
+                name: on-prem-db-secret
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: schema-volume
+              mountPath: /docker-entrypoint-initdb.d
+            - name: postgres-config
+              mountPath: /etc/postgresql/postgresql.conf
+              subPath: postgresql.conf
+            - name: postgres-config
+              mountPath: /etc/postgresql/pg_hba.conf
+              subPath: pg_hba.conf
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: schema-volume
+          configMap:
+            name: on-prem-db-config
+            items:
+              - key: schema.sql
+                path: schema.sql
+        - name: postgres-config
+          configMap:
+            name: on-prem-db-config
+            items:
+              - key: postgresql.conf
+                path: postgresql.conf
+              - key: pg_hba.conf
+                path: pg_hba.conf
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+ 
