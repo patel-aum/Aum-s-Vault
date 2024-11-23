@@ -1,102 +1,88 @@
-name: Build and Push to ECR
+name: CI - Build and Push to ECR
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REGISTRY: 627720351262.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY_PREFIX: aumsvault
+    branches:
+      - main
+    paths-ignore:
+      - './backend/older-monolith-backend'
 
 jobs:
-  detect-changes:
+  detect-and-build:
     runs-on: ubuntu-latest
-    outputs:
-      frontend: ${{ steps.changes.outputs.frontend }}
-      auth-service: ${{ steps.changes.outputs.auth-service }}
-      card-service: ${{ steps.changes.outputs.card-service }}
-      transaction-service: ${{ steps.changes.outputs.transaction-service }}
-      user-service: ${{ steps.changes.outputs.user-service }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            frontend:
-              - 'frontend/**'
-            auth-service:
-              - 'backend/auth-service/**'
-            card-service:
-              - 'backend/card-service/**'
-            transaction-service:
-              - 'backend/transaction-service/**'
-            user-service:
-              - 'backend/user-service/**'
 
-  build-and-push:
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - service: frontend
-            path: frontend
-            enabled: ${{ needs.detect-changes.outputs.frontend == 'true' }}
-          - service: auth-service
-            path: backend/auth-service
-            enabled: ${{ needs.detect-changes.outputs.auth-service == 'true' }}
-          - service: card-service
-            path: backend/card-service
-            enabled: ${{ needs.detect-changes.outputs.card-service == 'true' }}
-          - service: transaction-service
-            path: backend/transaction-service
-            enabled: ${{ needs.detect-changes.outputs.transaction-service == 'true' }}
-          - service: user-service
-            path: backend/user-service
-            enabled: ${{ needs.detect-changes.outputs.user-service == 'true' }}
-
-    if: ${{ matrix.enabled }}
-    
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Check Commit Message for "-build"
+        id: check_message
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"-build"* ]]; then
+            echo "build=true" >> $GITHUB_ENV
+          else
+            echo "build=false" >> $GITHUB_ENV
+          fi
+
+      - name: Skip Build if No "-build" in Commit Message
+        if: env.build == 'false'
+        run: echo "Skipping build and deployment steps."
+
+  build-and-deploy:
+    needs: detect-and-build
+    if: env.build == 'true'
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+      ECR_REGISTRY: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to ECR
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
-      - name: Get previous version
-        id: get-version
+      - name: Get Services to Build
+        id: services
         run: |
-          CURRENT_VERSION=$(aws ecr describe-images \
-            --repository-name ${{ env.ECR_REPOSITORY_PREFIX }}/${{ matrix.service }} \
-            --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' \
-            --output text || echo "v0")
-          CURRENT_NUMBER=$(echo $CURRENT_VERSION | sed 's/v//')
-          NEXT_VERSION="v$((CURRENT_NUMBER + 1))"
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          changed_dirs=$(git diff --name-only HEAD~1 HEAD | grep -E '^(backend|frontend)/' | awk -F/ '{print $1 "/" $2}' | uniq)
+          echo "::set-output name=services::${changed_dirs}"
 
-      - name: Build and push
-        env:
-          ECR_REGISTRY: ${{ env.ECR_REGISTRY }}
-          IMAGE_TAG: ${{ steps.get-version.outputs.next_version }}
+      - name: Build and Push Images
+        id: build-images
         run: |
-          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}/${{ matrix.service }}:$IMAGE_TAG ${{ matrix.path }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}/${{ matrix.service }}:$IMAGE_TAG
+          for service in ${{ steps.services.outputs.services }}; do
+            base_service=$(basename $service)
+            echo "Processing $base_service..."
+
+            version=$(grep -oP '(?<=image: .*/'${base_service}'\:v)[0-9]+' k8s/${base_service}/deployment.yaml | head -1)
+            new_version=$((version + 1))
+            echo "Incrementing version: v$version -> v$new_version"
+
+            sed -i "s/:v${version}/:v${new_version}/g" k8s/${base_service}/deployment.yaml
+
+            docker build -t ${{ env.ECR_REGISTRY }}/${base_service}:v${new_version} $service
+            docker push ${{ env.ECR_REGISTRY }}/${base_service}:v${new_version}
+          done
+
+      - name: Commit Updated Deployment Files
+        run: |
+          git add k8s/**/deployment.yaml
+          git commit -m "GITHUB ACTION: Updated deployment files with new versions."
+          git push
+
+
