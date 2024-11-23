@@ -113,7 +113,7 @@ services:
       - POSTGRES_DB=aumsvault
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
   adminer:
     image: adminer
