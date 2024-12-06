@@ -2,7 +2,7 @@
 */istio/*
 *.pem
 *.csr
-.terraform/*
+.terraform
 
 logs
 *.log
