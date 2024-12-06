@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: card-service
-          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/card-service:v1 
+          image: patelaum/vaultify-card-service:v1 
           ports:
             - containerPort: 5001
           envFrom:

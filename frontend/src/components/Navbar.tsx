@@ -20,7 +20,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <Vault className="h-8 w-8" />
-            <span className="text-xl font-bold">Aum's Vault</span>
+            <span className="text-xl font-bold">Vaultify</span>
           </Link>
 
           {/* Desktop Menu */}

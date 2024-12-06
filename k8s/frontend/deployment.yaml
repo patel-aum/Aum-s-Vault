@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/frontend:v1 
+          image: patelaum/vaultify-frontend:v2 
           ports:
             - containerPort: 80
           envFrom:

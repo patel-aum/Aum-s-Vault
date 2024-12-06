@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/user-service:v1 
+          image: patelaum/vaultify-user-service:v1 
           ports:
             - containerPort: 5003
           envFrom:

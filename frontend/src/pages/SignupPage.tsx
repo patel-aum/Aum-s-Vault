@@ -54,7 +54,7 @@ export default function SignupPage() {
             <UserPlus className="h-8 w-8 text-indigo-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Create an account</h2>
-          <p className="text-gray-600">Join Aum's Vault today</p>
+          <p className="text-gray-600">Join Vaultify today</p>
         </div>
 
         {error && (
