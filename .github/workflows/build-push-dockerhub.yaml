@@ -10,6 +10,7 @@ on:
 jobs:
   detect-and-build:
     runs-on: ubuntu-latest
+    environment: aumsvault
     outputs:
       should_build: ${{ steps.check_message.outputs.build }}
     steps:
@@ -38,14 +39,15 @@ jobs:
     needs: detect-and-build
     if: needs.detect-and-build.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    environment: aumsvault
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          username: patelaum
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Find Services to Build
