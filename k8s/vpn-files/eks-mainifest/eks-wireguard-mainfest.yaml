@@ -13,7 +13,7 @@ metadata:
 data:
   wg0.conf: |
     [Interface]
-    PrivateKey = ULamCrhn//tOHV/AHeogX3fvvIJ/JbMP0gW2jbagqWo= #Add your eks privatekey
+    PrivateKey = <eks private kay> #Add your eks privatekey
     Address = 10.0.0.1/24
     ListenPort = 51820
     
@@ -21,7 +21,7 @@ data:
     PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
 
     [Peer]
-    PublicKey = NiPqDQteg+gks2y0/7mn37ypnhAWf5Li5BPmYvD4OlM= #Add your on-prem or minikube publickey
+    PublicKey = <minikube publickey> #Add your on-prem or minikube publickey
     AllowedIPs =  10.0.0.0/24, 192.168.184.0/24
 
 ---
