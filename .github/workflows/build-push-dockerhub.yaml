@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - test-pipeline
     paths-ignore:
       - './backend/older-monolith-backend'
 
@@ -77,4 +78,4 @@ jobs:
           git commit -m "GITHUB ACTION: Updated deployment files with new versions."
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
