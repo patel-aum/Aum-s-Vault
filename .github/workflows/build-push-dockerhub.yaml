@@ -15,41 +15,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2  # Fetch the last 2 commits to enable diff
+          fetch-depth: 1
       
       - name: Detect Changed Services
         id: detect_changes
         run: |
-          # Initialize services variable
           services=""
-          
-          # Get the list of changed files
-          if [ ${{ github.event.before }} = "0000000000000000000000000000000000000000" ]; then
-            # If this is the first commit, get all files
-            CHANGED_FILES=$(git ls-tree -r --name-only HEAD)
-          else
-            # Get changed files between commits
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
+          frontend_changes=$(git show --name-only | grep "frontend" | awk -F/ '{print $1}' | sort | uniq)
+          services=$frontend_changes
+
+          backend_changes=$(git show --name-only | grep "backend" | grep -oP "backend/\K([^/]+)" | sort | uniq)
+          if [ ! -z "$backend_changes" ]; then
+            services+=" $backend_changes"
           fi
-          
-          # Check for frontend changes
-          if echo "$CHANGED_FILES" | grep -q "^frontend/"; then
-            services="frontend"
-          fi
-          
-          # Check for backend service changes
-          for service in backend/*/; do
-            service_name=$(basename $service)
-            if echo "$CHANGED_FILES" | grep -q "^backend/${service_name}/"; then
-              services="$services $service_name"
-            fi
-          done
-          
-          # Trim leading/trailing spaces
           services=$(echo "$services" | xargs)
-          
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
           echo "Services to build: $services"
           echo "services=${services}" >> $GITHUB_OUTPUT
   
@@ -72,8 +51,13 @@ jobs:
           for service in ${{ needs.detect-changes.outputs.services_to_build }}; do
             if [[ "$service" == "frontend" ]]; then
               echo "Building and pushing frontend image..."
-              docker build -t patelaum/vaultify-frontend:latest frontend/
-              docker push patelaum/vaultify-frontend:latest
+              version=$(grep -oP '(?<=image: patelaum/vaultify-frontend\:v)[0-9]+' k8s/frontend/deployment.yaml | head -1)
+              new_version=$((version + 1))
+              echo "Incrementing version: v$version -> v$new_version"
+              sed -i "s/vaultify-frontend:v${version}/vaultify-frontend:v${new_version}/g" k8s/frontend/deployment.yaml
+              
+              docker build -t patelaum/vaultify-frontend:v${new_version} frontend/
+              docker push patelaum/vaultify-frontend:v${new_version}
             else
               echo "Building and pushing $service image..."
               version=$(grep -oP '(?<=image: patelaum/vaultify-'${service}'\:v)[0-9]+' k8s/${service}/deployment.yaml | head -1)
@@ -91,6 +75,9 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
           git add k8s/**/deployment.yaml
-          git diff --quiet && git diff --staged --quiet || (git commit -m "GITHUB ACTION: Updated deployment files with new versions." && git push)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          git commit -m "GITHUB ACTION: Updated deployment files with new versions."
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GIT_TOKEN }}
+          branch: ${{ github.ref }}
