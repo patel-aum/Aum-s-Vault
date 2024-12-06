@@ -21,10 +21,10 @@ jobs:
         id: detect_changes
         run: |
           services=""
-          frontend_changes=$(git show --name-only | grep "frontend" | awk -F/ '{print $1}' | sort | uniq)
+          frontend_changes=$(git show --name-only | grep "^frontend" | awk -F/ '{print $1}' | sort | uniq)
           services=$frontend_changes
 
-          backend_changes=$(git show --name-only | grep "backend" | grep -oP "backend/\K([^/]+)" | sort | uniq)
+          backend_changes=$(git show --name-only | grep "^backend" | grep -oP "backend/\K([^/]+)" | grep -v "older-monolith-backend" | sort | uniq)
           if [ ! -z "$backend_changes" ]; then
             services+=" $backend_changes"
           fi
