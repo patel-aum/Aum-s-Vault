@@ -7,7 +7,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="text-center space-y-8">
         <h1 className="text-5xl font-bold text-gray-900">
-          Welcome to <span className="text-indigo-600">Aum's Vault</span>
+          Welcome to <span className="text-indigo-600">Vaultify</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Experience banking reimagined with cutting-edge security and seamless transactions
@@ -57,7 +57,7 @@ export default function HomePage() {
       <section className="bg-indigo-600 text-white p-12 rounded-2xl text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
         <p className="mb-8 text-indigo-100">
-          Join thousands of satisfied customers who trust Aum's Vault
+          Join thousands of satisfied customers who trust Vaultify
         </p>
         <Link
           to="/signup"

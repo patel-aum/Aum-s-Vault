@@ -92,6 +92,10 @@ export const transactions = {
     const response = await transactionsApi.post(`/transactions/transfer`, data);
     return response.data;
   },
+  getBalance: async () => {
+  const response = await transactionsApi.get(`/transactions/balance`);
+  return response.data;
+  },
 };
 
 export const users = {

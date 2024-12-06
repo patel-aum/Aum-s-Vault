@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: transactions-service
-          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/transactions-service:v1 
+          image: patelaum/vaultify-transaction-service:v1
           ports:
             - containerPort: 5002
           envFrom:

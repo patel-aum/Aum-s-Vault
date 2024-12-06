@@ -11,13 +11,13 @@ metadata:
 data:
   wg0.conf: |
     [Interface]
-    PrivateKey = <add here>  # Add youre on-prem minikube private key
+    PrivateKey = WMJsHrCxe5g77ONRsKBdiFFFXs6z0ZZtuB1OnIuUPl4=  # Add youre on-prem minikube private key
     Address = 10.0.0.2/24
     DNS = 8.8.8.8, 8.8.4.4
 
     [Peer]
-    PublicKey = <add here>  # Add your EKS or cloud public key
-    Endpoint = <add here> #<ip:51820>  # Add your EKS node IP here
+    PublicKey = lOk+7+lfaiegHUdygNbMkvd1f5dvtCQkAss3Yy5LEm4=  # Add your EKS or cloud public key
+    Endpoint = 172.31.0.2:51820 #<ip:51820>  # Add your EKS node IP here
     AllowedIPs = 10.0.0.0/24
     PersistentKeepalive = 25
 ---

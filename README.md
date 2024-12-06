@@ -1,7 +1,7 @@
 
-# AumsVault Banking Application
+# Vaultify Banking Application
 
-AumsVault is a secure, modern banking application built on a microservices architecture that implements hybrid cloud deployment using Amazon EKS and on-premises infrastructure. The system follows banking industry standards and zero-trust security principles.
+Vaultify is a secure, modern banking application built on a microservices architecture that implements hybrid cloud deployment using Amazon EKS and on-premises infrastructure. The system follows banking industry standards and zero-trust security principles.
 
 ## Architecture Overview
 ![AumsVault drawio (1)](https://github.com/user-attachments/assets/b77f1852-ab5d-4a79-953f-e68dc225b335)

@@ -1,5 +1,8 @@
 *.key
 */istio/*
+*.pem
+*.csr
+.terraform/*
 
 logs
 *.log

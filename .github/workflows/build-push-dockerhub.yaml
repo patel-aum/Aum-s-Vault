@@ -1,0 +1,80 @@
+name: CI - Build and Push to DockerHub
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - './backend/older-monolith-backend'
+
+jobs:
+  detect-and-build:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check_message.outputs.build }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          
+      - name: Check Commit Message for "-build"
+        id: check_message
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"-build"* ]]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Skip Build if No "-build" in Commit Message
+        if: steps.check_message.outputs.build == 'false'
+        run: echo "Skipping build and deployment steps."
+
+  build-and-deploy:
+    needs: detect-and-build
+    if: needs.detect-and-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: patelaum
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Find Services to Build
+        id: services
+        run: |
+          services=$(find . -type f -name "Dockerfile" -exec dirname {} \;)
+          echo "services=${services}" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Images 
+        id: build-images
+        run: |
+          for service in ${{ steps.services.outputs.services }}; do
+            base_service=$(basename $service)
+            echo "Processing $base_service..."
+            version=$(grep -oP '(?<=image: patelaum/vaultify-'${base_service}'\:v)[0-9]+' k8s/${base_service}/deployment.yaml | head -1)
+            new_version=$((version + 1))
+            echo "Incrementing version: v$version -> v$new_version"
+            
+            # Update deployment file with new version
+            sed -i "s/vaultify-${base_service}:v${version}/vaultify-${base_service}:v${new_version}/g" k8s/${base_service}/deployment.yaml
+            
+            # Build and push Docker image
+            docker build -t patelaum/vaultify-${base_service}:v${new_version} $service
+            docker push patelaum/vaultify-${base_service}:v${new_version}
+          done
+
+      - name: Commit Updated Deployment Files
+        run: |
+          git add k8s/**/deployment.yaml
+          git commit -m "GITHUB ACTION: Updated deployment files with new versions."
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

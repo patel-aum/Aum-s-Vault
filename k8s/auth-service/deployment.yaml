@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: 627720351262.dkr.ecr.us-east-1.amazonaws.com/aumsvault/auth-service:v1 
+          image: patelaum/vaultify-auth-service:v1
           ports:
             - containerPort: 5000
           envFrom:

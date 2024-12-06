@@ -1,5 +1,43 @@
 import { query } from '../config/db.js';
 
+export const getBalance = async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT 
+        json_build_object(
+          'total_balance', SUM(balance),
+          'accounts', json_agg(
+            json_build_object(
+              'id', id,
+              'account_number', account_number,
+              'balance', balance,
+              'type', type
+            )
+          )
+        ) as balance_info
+      FROM accounts 
+      WHERE user_id = $1
+      GROUP BY user_id`,
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({
+        total_balance: 0,
+        accounts: []
+      });
+    }
+
+    // Ensure accounts is an array even if null
+    const balanceInfo = result.rows[0].balance_info;
+    balanceInfo.accounts = balanceInfo.accounts || [];
+
+    res.json(balanceInfo);
+  } catch (error) {
+    console.error('Error fetching balance:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 export const getTransactions = async (req, res) => {
   try {
     const result = await query(

@@ -8,7 +8,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2">
               <Vault className="h-6 w-6" />
-              <span className="text-lg font-bold">Aum's Vault</span>
+              <span className="text-lg font-bold">Vaultify</span>
             </div>
             <p className="mt-2 text-gray-400">
               Secure banking solutions for a better tomorrow
@@ -40,14 +40,14 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li>1234 Banking Street</li>
               <li>Financial District</li>
-              <li>support@aumsvault.com</li>
+              <li>support@vaultify.com</li>
               <li>+1 (555) 123-4567</li>
             </ul>
           </div>
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Aum's Vault. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Vaultify. All rights reserved.</p>
         </div>
       </div>
     </footer>
